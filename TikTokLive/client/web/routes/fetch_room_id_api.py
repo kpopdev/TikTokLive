@@ -59,7 +59,7 @@ class FetchRoomIdAPIRoute(ClientRoute):
                 f"TikTok returned a non-JSON response for '{unique_id}' "
                 f"(HTTP {response.status_code}). You are likely being rate-limited "
                 f"or temporarily blocked by TikTok."
-            )
+            ) from None
 
         # Invalid user
         if response_json.get("message") == "user_not_found":
