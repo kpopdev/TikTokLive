@@ -38,6 +38,7 @@ class FetchRoomIdAPIRoute(ClientRoute):
         :param web: The TikTokHTTPClient client to use
         :param unique_id: The user to check
         :return: The user's room info
+        :raises FailedParseRoomIdError: If TikTok returns a non-JSON or blocked response
 
         """
 
@@ -51,11 +52,17 @@ class FetchRoomIdAPIRoute(ClientRoute):
             )
         )
 
-        response_json: dict = response.json()
-
+        try:
+            response_json: dict = response.json()
+        except ValueError:
+            raise FailedParseRoomIdError(
+                f"TikTok returned a non-JSON response for '{unique_id}' "
+                f"(HTTP {response.status_code}). You are likely being rate-limited "
+                f"or temporarily blocked by TikTok."
+            )
 
         # Invalid user
-        if response_json["message"] == "user_not_found":
+        if response_json.get("message") == "user_not_found":
             raise UserNotFoundError(
                 unique_id,
                 (
